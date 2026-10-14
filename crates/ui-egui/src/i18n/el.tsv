@@ -4008,3 +4008,17 @@ curves	Smooth	Εξομάλυνση
 
 # Graphics Adapter preference (#1885)
 	GPU adapter	Προσαρμογέας GPU
+
+# System print job controls
+	Auto-Rotate Image	Αυτόματη περιστροφή εικόνας
+	C5 Envelope	Φάκελος C5
+	Collate	Ταξινόμηση αντιγράφων
+	Print in Grayscale	Εκτύπωση σε κλίμακα του γκρι
+	Printer Default	Προεπιλογή εκτυπωτή
+	Printer Properties	Ιδιότητες εκτυπωτή
+	Printer preferences opened	Άνοιξαν οι προτιμήσεις εκτυπωτή
+	Single-Sided	Μονής όψης
+	System Default	Προεπιλογή συστήματος
+	Two-Sided, Flip on Long Edge	Διπλής όψης, αναστροφή στη μεγάλη πλευρά
+	Two-Sided, Flip on Short Edge	Διπλής όψης, αναστροφή στη μικρή πλευρά
+	Unavailable	Μη διαθέσιμο

@@ -311,21 +311,38 @@ fn system_dialog_receives_pdf_and_reports_confirmation_or_cancel() {
     let calls = Arc::new(AtomicUsize::new(0));
     let seen = Arc::clone(&calls);
     let mut s = session("rgb", 8);
-    s.system_print_dialog = Some(Arc::new(move |pdf, title| {
+    s.system_print_dialog = Some(Arc::new(move |pdf, settings| {
         assert!(pdf.starts_with(b"%PDF"));
-        assert_eq!(title, "Print Me.psd");
+        assert_eq!(settings.title, "Print Me.psd");
+        assert_eq!(settings.copies, 2);
+        assert!(settings.collate);
+        assert_eq!(settings.paper, (612.0, 792.0));
         seen.fetch_add(1, Ordering::Relaxed);
         Ok(SystemPrintOutcome::Printed)
     }));
-    let printed = s.execute("file.print", json!({"systemDialog": true})).unwrap();
+    let printed = s.execute("file.print", json!({"systemDialog": true, "copies": 2})).unwrap();
     assert_eq!(printed["sent"], true);
     assert_eq!(printed["spooler"], "system-dialog");
+    assert!(printed["copies"].is_null(), "the system dialog's final choice is unknown");
     assert_eq!(calls.load(Ordering::Relaxed), 1);
+    let remembered = last_print(&s).unwrap();
+    assert!(remembered.get("copies").is_none(), "the OS dialog owns final job settings");
 
     s.system_print_dialog = Some(Arc::new(|_, _| Ok(SystemPrintOutcome::Cancelled)));
     let cancelled = s.execute("file.print", json!({"systemDialog": true})).unwrap();
     assert_eq!(cancelled["cancelled"], true);
     assert_eq!(cancelled["sent"], false);
+}
+
+#[test]
+fn windows_rgb_transport_rotates_pixels_before_printing() {
+    let mut page = page_of(3, vec![1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0], false);
+    page.image.width = 2;
+    page.image.height = 3;
+    page.rotate_image = true;
+    let rgb = page_rgb(&page).unwrap();
+    let red: Vec<u8> = rgb.as_chunks::<3>().0.iter().map(|pixel| pixel[0]).collect();
+    assert_eq!(red, [2, 4, 6, 1, 3, 5]);
 }
 
 #[test]

@@ -1284,6 +1284,8 @@ pub(crate) fn print_status(app: &mut PhotocraftApp, r: &Value) {
         crate::i18n::fmt(tl!("Cancelled {label}"), &[("label", tl!("Print"))])
     } else if let Some(printer) = r["spooler"]["printer"].as_str() {
         crate::i18n::fmt(tl!("Sent to {printer}"), &[("printer", printer)])
+    } else if r["systemDialog"] == json!(true) && r["sent"] == json!(true) {
+        tl!("Sent to the printer").to_string()
     } else if r["sent"] == json!(true) {
         let template = "Sent to the printer ({spooler})";
         crate::i18n::fmt(tl!(template), &[("spooler", r["spooler"].as_str().unwrap_or(""))])
@@ -1558,6 +1560,13 @@ mod tests {
         assert_eq!(fields["driverOptions"], json!({"InputSlot": "Tray2", "Quality": "Normal"}));
         set_print_driver_options(&mut fields, choices, false);
         assert_eq!(fields["driverOptions"], json!({"InputSlot": "auto", "Quality": "Normal"}));
+    }
+
+    #[test]
+    fn system_dialog_print_uses_a_plain_success_status() {
+        let (mut app, _) = app();
+        print_status(&mut app, &json!({"systemDialog": true, "sent": true, "spooler": "system-dialog"}));
+        assert_eq!(app.ui.status, "Sent to the printer");
     }
 
     #[test]
